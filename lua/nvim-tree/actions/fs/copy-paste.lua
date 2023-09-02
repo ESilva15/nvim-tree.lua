@@ -4,6 +4,7 @@ local utils = require "nvim-tree.utils"
 local core = require "nvim-tree.core"
 local events = require "nvim-tree.events"
 local notify = require "nvim-tree.notify"
+local marks = require "nvim-tree.marks"
 
 local find_file = require("nvim-tree.actions.finders.find-file").fn
 
@@ -139,11 +140,16 @@ local function add_to_clipboard(node, clip)
   for idx, _node in ipairs(clip) do
     if _node.absolute_path == node.absolute_path then
       table.remove(clip, idx)
+      -- Removes the mark from the clipboard
+      marks.toggle_clipboard_mark(node)
       return notify.info(notify_node .. " removed from clipboard.")
     end
   end
   table.insert(clip, node)
   notify.info(notify_node .. " added to clipboard.")
+
+  -- Marks the item
+  marks.toggle_clipboard_mark(node)
 end
 
 function M.clear_clipboard()
@@ -185,6 +191,8 @@ local function do_paste(node, action_type, action_fn)
   for _, _node in ipairs(clip) do
     local dest = utils.path_join { destination, _node.name }
     do_single_paste(_node.absolute_path, dest, action_type, action_fn)
+    -- Deletes the mark from the node
+    marks.toggle_clipboard_mark(_node)
   end
 
   clipboard[action_type] = {}

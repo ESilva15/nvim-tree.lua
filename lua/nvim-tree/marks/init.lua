@@ -16,6 +16,18 @@ local function remove_mark(node)
   M.draw()
 end
 
+function M.toggle_clipboard_mark(node) 
+  if node.absolute_path == nil then
+    return
+  end
+
+  if M.get_mark(node) then
+    remove_mark(node)
+  else
+    add_mark(node)
+  end
+end
+
 function M.toggle_mark(node)
   if node.absolute_path == nil then
     return
@@ -67,6 +79,8 @@ function M.draw()
     end)
     :applier(function(node, idx)
       if M.get_mark(node) then
+        -- May be here
+        vim.fn.sign_place(0, GROUP, SIGN_NAME, buf, { lnum = idx + add, priority = 3 })
         vim.fn.sign_place(0, GROUP, SIGN_NAME, buf, { lnum = idx + add, priority = 3 })
       end
     end)
